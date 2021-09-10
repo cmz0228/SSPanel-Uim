@@ -706,10 +706,9 @@ class UserController extends BaseController
             $res['msg'] = '未填写邮箱';
             return $response->withJson($res);
         }
-        if (!Check::isEmailLegal($newemail)) {
-            $res['ret'] = 0;
-            $res['msg'] = '邮箱无效';
-            return $response->withJson($res);
+        $check_res = Check::isEmailLegal($email);
+        if ($check_res['ret'] == 0) {
+            return $response->withJson($check_res);
         }
         if ($otheruser != null) {
             $res['ret'] = 0;
@@ -1271,7 +1270,7 @@ class UserController extends BaseController
      */
     public function updateSsPwd($request, $response, $args)
     {
-        $user = Auth::getUser();
+        $user = $this->user;
         $pwd = Tools::genRandomChar(16);
         $current_timestamp = time();
         $new_uuid = Uuid::uuid3(Uuid::NAMESPACE_DNS, $user->email . '|' . $current_timestamp);
@@ -1333,6 +1332,12 @@ class UserController extends BaseController
      */
     public function doCheckIn($request, $response, $args)
     {
+        if ($_ENV['enable_checkin'] === false) {
+            $res['ret'] = 0;
+            $res['msg'] = '目前站点没有启用签到功能。';
+            return $response->withJson($res);
+        }
+
         if ($_ENV['enable_checkin_captcha'] == true) {
             $ret = Captcha::verify($request->getParams());
             if (!$ret) {
@@ -1385,7 +1390,7 @@ class UserController extends BaseController
      */
     public function handleKill($request, $response, $args)
     {
-        $user = Auth::getUser();
+        $user = $this->user;
 
         $email = $user->email;
 

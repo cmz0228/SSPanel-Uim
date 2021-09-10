@@ -228,11 +228,9 @@ class AuthController extends BaseController
                 ]);
             }
             // check email format
-            if (!Check::isEmailLegal($email)) {
-                return $response->withJson([
-                    'ret' => 0,
-                    'msg' => '邮箱无效'
-                ]);
+            $check_res = Check::isEmailLegal($email);
+            if ($check_res['ret'] == 0) {
+                return $response->withJson($check_res);
             }
             $user = User::where('email', $email)->first();
             if ($user != null) {
@@ -360,8 +358,8 @@ class AuthController extends BaseController
 
         $user->transfer_enable      = Tools::toGB(Config::getconfig('Register.string.defaultTraffic'));
         $user->invite_num           = (int) Config::getconfig('Register.string.defaultInviteNum');
-        $user->auto_reset_day       = $_ENV['reg_auto_reset_day'];
-        $user->auto_reset_bandwidth = $_ENV['reg_auto_reset_bandwidth'];
+        $user->auto_reset_day       = $_ENV['free_user_reset_day'];
+        $user->auto_reset_bandwidth = $_ENV['free_user_reset_bandwidth'];
         $user->money                = 0;
         $user->sendDailyMail        = Config::getconfig('Register.bool.send_dailyEmail');
 
@@ -469,11 +467,9 @@ class AuthController extends BaseController
         }
 
         // check email format
-        if (!Check::isEmailLegal($email)) {
-            return $response->withJson([
-                'ret' => 0,
-                'msg' => '邮箱无效'
-            ]);
+        $check_res = Check::isEmailLegal($email);
+        if ($check_res['ret'] == 0) {
+            return $response->withJson($check_res);
         }
         // check email
         $user = User::where('email', $email)->first();

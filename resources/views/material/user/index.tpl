@@ -195,34 +195,32 @@ table tr td:first-child {
                                     </div>
                                 </div>
                             </div>
+                            {if $config['enable_checkin'] == true}
                             <div class="card-inner margin-bottom-no">
                                 <p class="card-heading"><i class="icon icon-md">account_circle</i> 签到</p>
-                                    <p>上次签到时间：{$user->lastCheckInTime()}</p>
-                                    <p id="checkin-msg"></p>
-                                    {if $geetest_html != null}
-                                        <div id="popup-captcha"></div>
-                                    {/if}
-                                    {if $config['enable_checkin_captcha'] == true && $user->isAbleToCheckin()}
-                                        <div class="g-recaptcha" data-sitekey="{$recaptcha_sitekey}"></div>
-                                    {/if}
-                                    <div class="card-action">
-                                        <div class="usercheck pull-left">
-                                            {if $user->isAbleToCheckin() }
-                                                <div id="checkin-btn">
-                                                    <button id="checkin" class="btn btn-brand btn-flat"><span
-                                                                class="icon">check</span>&nbsp;点我签到&nbsp;
-                                                        <div><span class="icon">screen_rotation</span>&nbsp;或者摇动手机签到
-                                                        </div>
+                                <p>上次签到时间：{$user->lastCheckInTime()}</p>
+                                <p id="checkin-msg"></p>
+                                {if $geetest_html != null}
+                                    <div id="popup-captcha"></div>
+                                {/if}
+                                {if $config['enable_checkin_captcha'] == true && $user->isAbleToCheckin()}
+                                    <div class="g-recaptcha" data-sitekey="{$recaptcha_sitekey}"></div>
+                                {/if}
+                                <div class="card-action">
+                                    <div class="usercheck pull-left">
+                                        {if $user->isAbleToCheckin() }
+                                            <div id="checkin-btn">
+                                                <button id="checkin" class="btn btn-brand btn-flat"><span class="icon">check</span>&nbsp;点我签到&nbsp;
+                                                    <div><span class="icon">screen_rotation</span>&nbsp;或者摇动手机签到</div>
                                                     </button>
-                                                </div>
-                                            {else}
-                                                <p><a class="btn btn-brand disabled btn-flat" href="#"><span
-                                                                class="icon">check</span>&nbsp;今日已签到</a></p>
-                                            {/if}
-                                        </div>
+                                            </div>
+                                        {else}
+                                            <p><a class="btn btn-brand disabled btn-flat" href="#"><span class="icon">check</span>&nbsp;今日已签到</a></p>
+                                        {/if}
                                     </div>
-                                </dl>
+                                </div>
                             </div>
+                            {/if}
                         </div>
                     </div>
                     <div class="card">
@@ -927,10 +925,12 @@ table tr td:first-child {
             $.ajax({
                 type: "POST",
                 url: "/user/checkin",
-                dataType: "json",{if $config['enable_checkin_captcha'] == true}
+                dataType: "json",
+                {if $config['enable_checkin_captcha'] == true && $config['captcha_provider'] == 'recaptcha'}
                 data: {
                     recaptcha: grecaptcha.getResponse()
-                },{/if}
+                },
+                {/if}
                 success: (data) => {
                     if (data.ret) {
 
@@ -959,10 +959,12 @@ table tr td:first-child {
             $.ajax({
                 type: "POST",
                 url: "/user/checkin",
-                dataType: "json",{if $config['enable_checkin_captcha'] == true}
+                dataType: "json",
+                {if $config['enable_checkin_captcha'] == true && $config['captcha_provider'] == 'recaptcha'}
                 data: {
                     recaptcha: grecaptcha.getResponse()
-                },{/if}
+                },
+                {/if}
                 success: (data) => {
                     if (data.ret) {
                         $$.getElementById('checkin-msg').innerHTML = data.msg;
@@ -999,6 +1001,7 @@ table tr td:first-child {
             c.show();
         }
     };
+    var checkedmsgGE = '<p><a class="btn btn-brand disabled btn-flat waves-attach" href="#"><span class="icon">check</span>&nbsp;已签到</a></p>';
     var handlerPopup = function (captchaObj) {
         c = captchaObj;
         captchaObj.onSuccess(function () {
@@ -1049,6 +1052,6 @@ table tr td:first-child {
     {/if}
 </script>
 
-{if $config['enable_checkin_captcha'] == true}
+{if $config['enable_checkin_captcha'] == true && $config['captcha_provider'] == 'recaptcha'}
     <script src="https://recaptcha.net/recaptcha/api.js" async defer></script>
 {/if}
